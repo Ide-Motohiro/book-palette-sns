@@ -1,40 +1,22 @@
 import { BookCard } from './BookCard';
 import { Plus } from 'lucide-react';
 
-// モックデータ
-const mockPosts = [
-  {
-    id: '1',
-    bookTitle: '人間失格',
-    author: '太宰治',
-    keywords: ['孤独', '絶望', '人間性'],
-    color: '#6B73FF',
-    userId: 'user1'
-  },
-  {
-    id: '2',
-    bookTitle: 'ノルウェイの森',
-    author: '村上春樹',
-    keywords: ['青春', '喪失', '記憶'],
-    color: '#34D399',
-    userId: 'user2'
-  },
-  {
-    id: '3',
-    bookTitle: '夜と霧',
-    author: 'ヴィクトール・フランクル',
-    keywords: ['希望', '強さ', '生きる意味'],
-    color: '#F59E0B',
-    userId: 'user3'
-  }
-];
+interface Post {
+  id: string;
+  bookTitle: string;
+  author: string;
+  keywords: string[];
+  color: string;
+  userId: string;
+}
 
 interface TimelineProps {
+  posts: Post[];
   onCreatePost: () => void;
   onPostClick: (postId: string) => void;
 }
 
-export const Timeline = ({ onCreatePost, onPostClick }: TimelineProps) => {
+export const Timeline = ({ posts, onCreatePost, onPostClick }: TimelineProps) => {
   return (
     <div className="min-h-screen bg-user-bg relative">
       {/* Header */}
@@ -47,7 +29,7 @@ export const Timeline = ({ onCreatePost, onPostClick }: TimelineProps) => {
       {/* Timeline Feed */}
       <main className="max-w-2xl mx-auto px-4 py-6 pb-24">
         <div className="space-y-4">
-          {mockPosts.map((post) => (
+          {posts.map((post) => (
             <BookCard
               key={post.id}
               post={post}

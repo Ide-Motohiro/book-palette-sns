@@ -1,6 +1,6 @@
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Trash2 } from 'lucide-react';
+import { Button } from './ui/button';
 
-// モックデータの型定義
 interface Post {
   id: string;
   bookTitle: string;
@@ -12,43 +12,20 @@ interface Post {
 
 interface PostDetailProps {
   postId: string;
+  posts: Post[];
   onBack: () => void;
+  onDelete: (postId: string) => void;
 }
 
-// モックデータ（実際の実装時はAPIから取得）
-const getPostById = (id: string): Post | undefined => {
-  const posts = [
-    {
-      id: '1',
-      bookTitle: '人間失格',
-      author: '太宰治',
-      keywords: ['孤独', '絶望', '人間性', '自己嫌悪', '内省', '文学的', '重厚', '心理描写'],
-      color: '#6B73FF',
-      userId: 'user1'
-    },
-    {
-      id: '2',
-      bookTitle: 'ノルウェイの森',
-      author: '村上春樹',
-      keywords: ['青春', '喪失', '記憶', 'ノスタルジア', '恋愛', '成長', '哀愁'],
-      color: '#34D399',
-      userId: 'user2'
-    },
-    {
-      id: '3',
-      bookTitle: '夜と霧',
-      author: 'ヴィクトール・フランクル',
-      keywords: ['希望', '強さ', '生きる意味', '困難', '人間の尊厳', '哲学的', '深い'],
-      color: '#F59E0B',
-      userId: 'user3'
-    }
-  ];
-  
-  return posts.find(post => post.id === id);
-};
+export const PostDetail = ({ postId, posts, onBack, onDelete }: PostDetailProps) => {
+  const post = posts.find(p => p.id === postId);
 
-export const PostDetail = ({ postId, onBack }: PostDetailProps) => {
-  const post = getPostById(postId);
+  const handleDelete = () => {
+    if (window.confirm('この投稿を削除しますか？')) {
+      onDelete(postId);
+      onBack();
+    }
+  };
 
   if (!post) {
     return (
@@ -74,6 +51,14 @@ export const PostDetail = ({ postId, onBack }: PostDetailProps) => {
             <ArrowLeft size={20} />
           </button>
           <h1 className="text-lg font-semibold">投稿詳細</h1>
+          <Button
+            onClick={handleDelete}
+            variant="outline"
+            size="sm"
+            className="ml-auto text-destructive hover:text-destructive-foreground hover:bg-destructive"
+          >
+            <Trash2 size={16} />
+          </Button>
         </div>
       </header>
 
