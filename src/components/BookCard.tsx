@@ -15,8 +15,11 @@ interface BookCardProps {
 export const BookCard = ({ post, onClick }: BookCardProps) => {
   return (
     <article 
-      className="book-card"
+      className="book-card relative overflow-hidden"
       onClick={onClick}
+      style={{
+        background: `linear-gradient(135deg, ${post.color}08, ${post.color}15)`
+      }}
     >
       {/* Book Title and Author */}
       <div className="mb-3">

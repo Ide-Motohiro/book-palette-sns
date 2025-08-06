@@ -3,33 +3,17 @@ import { ArrowLeft, Plus, X, Search } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 
-interface Book {
-  title: string;
-  author: string;
-}
-
 interface CreatePostProps {
   onBack: () => void;
   onSubmit: (post: any) => void;
 }
 
 export const CreatePost = ({ onBack, onSubmit }: CreatePostProps) => {
-  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [bookTitle, setBookTitle] = useState('');
+  const [author, setAuthor] = useState('');
   const [keywords, setKeywords] = useState<string[]>([]);
   const [keywordInput, setKeywordInput] = useState('');
   const [selectedColor, setSelectedColor] = useState('#6B73FF');
-
-  // モック書籍検索結果
-  const mockBooks = [
-    { title: '人間失格', author: '太宰治' },
-    { title: 'ノルウェイの森', author: '村上春樹' },
-    { title: '夜と霧', author: 'ヴィクトール・フランクル' },
-    { title: '君の名は。', author: '新海誠' },
-    { title: '羊をめぐる冒険', author: '村上春樹' }
-  ].filter(book => 
-    book.title.includes(searchQuery) || book.author.includes(searchQuery)
-  );
 
   const addKeyword = () => {
     if (keywordInput.trim() && !keywords.includes(keywordInput.trim())) {
@@ -43,15 +27,17 @@ export const CreatePost = ({ onBack, onSubmit }: CreatePostProps) => {
   };
 
   const handleSubmit = () => {
-    if (selectedBook && keywords.length > 0) {
+    if (bookTitle.trim() && author.trim() && keywords.length > 0) {
       onSubmit({
-        bookTitle: selectedBook.title,
-        author: selectedBook.author,
+        bookTitle: bookTitle.trim(),
+        author: author.trim(),
         keywords,
         color: selectedColor
       });
     }
   };
+
+  const isFormValid = bookTitle.trim() && author.trim() && keywords.length > 0;
 
   const presetColors = [
     '#6B73FF', '#34D399', '#F59E0B', '#EF4444', '#8B5CF6',
@@ -75,7 +61,8 @@ export const CreatePost = ({ onBack, onSubmit }: CreatePostProps) => {
           </div>
           <Button 
             onClick={handleSubmit}
-            disabled={!selectedBook || keywords.length === 0}
+            disabled={!isFormValid}
+            variant={isFormValid ? "default" : "secondary"}
             className="px-6"
           >
             投稿する
@@ -85,51 +72,29 @@ export const CreatePost = ({ onBack, onSubmit }: CreatePostProps) => {
 
       {/* Content */}
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-6">
-        {/* Book Search */}
+        {/* Book Input */}
         <section className="bg-card rounded-xl p-6 border border-border">
-          <h2 className="text-lg font-semibold mb-4">本を選択</h2>
+          <h2 className="text-lg font-semibold mb-4">本の情報</h2>
           
-          {selectedBook ? (
-            <div className="flex items-center justify-between p-4 bg-secondary rounded-lg">
-              <div>
-                <p className="font-medium">{selectedBook.title}</p>
-                <p className="text-sm text-muted-foreground">{selectedBook.author}</p>
-              </div>
-              <button
-                onClick={() => setSelectedBook(null)}
-                className="p-1 hover:bg-muted rounded"
-              >
-                <X size={16} />
-              </button>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">書籍名</label>
+              <Input
+                placeholder="書籍名を入力してください"
+                value={bookTitle}
+                onChange={(e) => setBookTitle(e.target.value)}
+              />
             </div>
-          ) : (
-            <div className="space-y-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16} />
-                <Input
-                  placeholder="書籍名または著者名で検索"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              
-              {searchQuery && (
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {mockBooks.map((book, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedBook(book)}
-                      className="w-full text-left p-3 hover:bg-secondary rounded-lg transition-colors"
-                    >
-                      <p className="font-medium">{book.title}</p>
-                      <p className="text-sm text-muted-foreground">{book.author}</p>
-                    </button>
-                  ))}
-                </div>
-              )}
+            
+            <div>
+              <label className="block text-sm font-medium mb-2">著者名</label>
+              <Input
+                placeholder="著者名を入力してください"
+                value={author}
+                onChange={(e) => setAuthor(e.target.value)}
+              />
             </div>
-          )}
+          </div>
         </section>
 
         {/* Keywords Input */}
