@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'; // useEffectをインポート
+import { useState, useEffect } from 'react';
 import { Timeline } from '../components/Timeline';
 import { PostDetail } from '../components/PostDetail';
 import { CreatePost } from '../components/CreatePost';
@@ -14,8 +14,9 @@ interface Post {
   userId: string;
 }
 
-// 初期モックデータ（localStorageが空の場合の初回データとして利用）
+// 初期モックデータ
 const initialPosts: Post[] = [
+  // ... （ここのデータは変更ありません）
   {
     id: '1',
     bookTitle: '人間失格',
@@ -45,23 +46,29 @@ const initialPosts: Post[] = [
 const Index = () => {
   const [currentView, setCurrentView] = useState<ViewState>('timeline');
   const [selectedPostId, setSelectedPostId] = useState<string>('');
-  
-  // ★ 変更点1: localStorageから投稿データを読み込んでstateを初期化
+
+  // タイムラインに表示される投稿リスト
   const [posts, setPosts] = useState<Post[]>(() => {
-    try {
-      const savedPosts = localStorage.getItem('book-palette-posts');
-      // 保存されたデータがあればそれを使い、なければ初期モックデータを使う
-      return savedPosts ? JSON.parse(savedPosts) : initialPosts;
-    } catch (error) {
-      console.error("Failed to parse posts from localStorage", error);
-      return initialPosts;
-    }
+    const savedPosts = localStorage.getItem('book-palette-posts');
+    return savedPosts ? JSON.parse(savedPosts) : initialPosts;
   });
 
-  // ★ 変更点2: postsのstateが変更されるたびにlocalStorageに保存
+  // ★ 変更点1: ゴミ箱内の投稿リストを管理する新しいstateを追加
+  const [trashedPosts, setTrashedPosts] = useState<Post[]>(() => {
+    const savedTrashedPosts = localStorage.getItem('book-palette-trashed-posts');
+    return savedTrashedPosts ? JSON.parse(savedTrashedPosts) : [];
+  });
+
+  // `posts`が変更されたらlocalStorageに保存
   useEffect(() => {
     localStorage.setItem('book-palette-posts', JSON.stringify(posts));
-  }, [posts]); // postsが変更された時だけこの処理が実行される
+  }, [posts]);
+
+  // ★ 変更点2: `trashedPosts`が変更されたら、それもlocalStorageに保存
+  useEffect(() => {
+    localStorage.setItem('book-palette-trashed-posts', JSON.stringify(trashedPosts));
+  }, [trashedPosts]);
+
 
   const handlePostClick = (postId: string) => {
     setSelectedPostId(postId);
@@ -79,20 +86,29 @@ const Index = () => {
   const handleSubmitPost = (postData: any) => {
     const newPost: Post = {
       id: Date.now().toString(),
+      // ... (中身は変更なし)
       bookTitle: postData.bookTitle,
       author: postData.author,
       keywords: postData.keywords,
       color: postData.color,
-      userId: 'currentUser' // 本来はログインユーザーのIDなどが入ります
+      userId: 'currentUser'
     };
     
     setPosts(prevPosts => [newPost, ...prevPosts]);
     setCurrentView('timeline');
   };
 
+  // ★ 変更点3: handleDeletePostの処理を「削除」から「ゴミ箱への移動」に変更
   const handleDeletePost = (postId: string) => {
-    setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+    const postToTrash = posts.find(p => p.id === postId);
+    if (postToTrash) {
+      // タイムラインのリストからは削除
+      setPosts(prevPosts => prevPosts.filter(p => p.id !== postId));
+      // ゴミ箱リストへは追加
+      setTrashedPosts(prevTrashed => [postToTrash, ...prevTrashed]);
+    }
   };
+
 
   if (currentView === 'detail') {
     return (
@@ -100,7 +116,7 @@ const Index = () => {
         postId={selectedPostId} 
         posts={posts}
         onBack={handleBack}
-        onDelete={handleDeletePost}
+        onDelete={handleDeletePost} // 渡す関数は同じだが、中の処理が変わった
       />
     );
   }
@@ -119,6 +135,7 @@ const Index = () => {
       posts={posts}
       onCreatePost={handleCreatePost}
       onPostClick={handlePostClick}
+      // onResetは一旦削除（後でゴミ箱画面に追加します）
     />
   );
 };
