@@ -1,6 +1,7 @@
 import { BookCard } from './BookCard';
-import { Plus, Trash2 } from 'lucide-react'; // Trash2 アイコンをインポート
-import { Button } from './ui/button'; // Buttonコンポーネントをインポート
+// ★★★ この行が重要です！ Plus と一緒に Trash2 を読み込みます ★★★
+import { Plus, Trash2 } from 'lucide-react'; 
+import { Button } from './ui/button';
 
 interface Post {
   id: string;
@@ -22,7 +23,6 @@ export const Timeline = ({ posts, onCreatePost, onPostClick }: TimelineProps) =>
     <div className="min-h-screen bg-user-bg relative">
       {/* Header */}
       <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border">
-        {/* ★ ヘッダーからゴミ箱ボタンを削除 */}
         <div className="max-w-2xl mx-auto px-4 py-4">
           <h1 className="text-2xl font-bold text-foreground">Book Palette</h1>
         </div>
@@ -41,15 +41,14 @@ export const Timeline = ({ posts, onCreatePost, onPostClick }: TimelineProps) =>
         </div>
       </main>
 
-      {/* ★★★ 変更点: フローティングボタンのコンテナ ★★★ */}
+      {/* フローティングボタンのコンテナ */}
       <div className="fixed bottom-6 right-6 flex flex-col items-center gap-3">
         {/* ゴミ箱ボタン */}
         <Button
-          variant="secondary" // スタイルを少し変更
+          variant="secondary"
           size="icon"
           className="rounded-full h-12 w-12 shadow-lg"
           aria-label="ゴミ箱を開く"
-          // onClickはまだ設定しない
         >
           <Trash2 size={20} />
         </Button>
@@ -57,7 +56,7 @@ export const Timeline = ({ posts, onCreatePost, onPostClick }: TimelineProps) =>
         {/* 新規投稿ボタン */}
         <button
           onClick={onCreatePost}
-          className="fab" // fabクラスはそのまま利用
+          className="fab"
           aria-label="新しい投稿を作成"
         >
           <Plus size={24} />
