@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+
 interface Post {
   id: string;
   bookTitle: string;
@@ -9,13 +11,18 @@ interface Post {
 
 interface BookCardProps {
   post: Post;
-  onClick: () => void;
+  onClick?: () => void; // ★ onClickを必須ではなくオプショナル（任意）に変更
 }
 
 export const BookCard = ({ post, onClick }: BookCardProps) => {
   return (
     <article 
-      className="book-card relative overflow-hidden"
+      // ★★★ この部分で、クリックできない時は見た目を調整 ★★★
+      className={cn(
+        "book-card relative overflow-hidden",
+        // onClickが指定されていない場合は、カーソルやホバーエフェクトを無効化
+        !onClick && "cursor-default hover:bg-card hover:shadow-sm"
+      )}
       onClick={onClick}
       style={{
         background: `linear-gradient(135deg, ${post.color}08, ${post.color}15)`

@@ -1,4 +1,6 @@
-// Postの型定義をIndex.tsxからコピー
+import { BookCard } from './BookCard'; // BookCardをインポート
+
+// Postの型定義
 interface Post {
   id: string;
   bookTitle: string;
@@ -13,22 +15,21 @@ interface TrashViewProps {
 }
 
 export const TrashView = ({ trashedPosts }: TrashViewProps) => {
-  // ゴミ箱が空の場合の表示
+  // ゴミ箱が空の場合
   if (trashedPosts.length === 0) {
     return <p className="text-center text-muted-foreground py-8">ゴミ箱は空です</p>;
   }
 
-  // ゴミ箱に投稿がある場合の表示
+  // ゴミ箱に投稿がある場合
   return (
-    <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
+    // ★ リスト全体の見た目を調整
+    <div className="space-y-4 max-h-[60vh] overflow-y-auto p-1 -mr-2">
       {trashedPosts.map(post => (
-        <div key={post.id} className="flex items-center justify-between p-3 bg-secondary rounded-lg">
-          <div>
-            <p className="font-semibold">{post.bookTitle}</p>
-            <p className="text-sm text-muted-foreground">{post.author}</p>
-          </div>
-          {/* ここにはまだボタンを配置しません */}
-        </div>
+        <BookCard
+          key={post.id}
+          post={post}
+          // ここではonClickを渡さないことで、クリックできないカードとして表示
+        />
       ))}
     </div>
   );
