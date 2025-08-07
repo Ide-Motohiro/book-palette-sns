@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // useEffectをインポート
 import { Timeline } from '../components/Timeline';
 import { PostDetail } from '../components/PostDetail';
 import { CreatePost } from '../components/CreatePost';
@@ -14,7 +14,7 @@ interface Post {
   userId: string;
 }
 
-// 初期モックデータ
+// 初期モックデータ（localStorageが空の場合の初回データとして利用）
 const initialPosts: Post[] = [
   {
     id: '1',
@@ -45,7 +45,23 @@ const initialPosts: Post[] = [
 const Index = () => {
   const [currentView, setCurrentView] = useState<ViewState>('timeline');
   const [selectedPostId, setSelectedPostId] = useState<string>('');
-  const [posts, setPosts] = useState<Post[]>(initialPosts);
+  
+  // ★ 変更点1: localStorageから投稿データを読み込んでstateを初期化
+  const [posts, setPosts] = useState<Post[]>(() => {
+    try {
+      const savedPosts = localStorage.getItem('book-palette-posts');
+      // 保存されたデータがあればそれを使い、なければ初期モックデータを使う
+      return savedPosts ? JSON.parse(savedPosts) : initialPosts;
+    } catch (error) {
+      console.error("Failed to parse posts from localStorage", error);
+      return initialPosts;
+    }
+  });
+
+  // ★ 変更点2: postsのstateが変更されるたびにlocalStorageに保存
+  useEffect(() => {
+    localStorage.setItem('book-palette-posts', JSON.stringify(posts));
+  }, [posts]); // postsが変更された時だけこの処理が実行される
 
   const handlePostClick = (postId: string) => {
     setSelectedPostId(postId);
@@ -67,7 +83,7 @@ const Index = () => {
       author: postData.author,
       keywords: postData.keywords,
       color: postData.color,
-      userId: 'currentUser'
+      userId: 'currentUser' // 本来はログインユーザーのIDなどが入ります
     };
     
     setPosts(prevPosts => [newPost, ...prevPosts]);
