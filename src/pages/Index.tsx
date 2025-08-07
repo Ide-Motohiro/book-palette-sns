@@ -52,6 +52,26 @@ const Index = () => {
   useEffect(() => { localStorage.setItem('book-palette-posts', JSON.stringify(posts)); }, [posts]);
   useEffect(() => { localStorage.setItem('book-palette-trashed-posts', JSON.stringify(trashedPosts)); }, [trashedPosts]);
   
+  // ★★★ ここが修正点です ★★★
+  const handleDeletePost = (postId: string) => {
+    // 削除しようとしている投稿が、初期サンプルのいずれかに含まれるかチェック
+    const isSamplePost = initialPosts.some(initialPost => initialPost.id === postId);
+
+    if (isSamplePost) {
+      // サンプル投稿だった場合は、アラートを表示して処理を中断
+      alert("サンプル投稿は削除できません。");
+      return; 
+    }
+
+    // ユーザーが作成した投稿の場合は、通常通りゴミ箱へ移動
+    const postToTrash = posts.find(p => p.id === postId);
+    if (postToTrash) {
+      setPosts(prevPosts => prevPosts.filter(p => p.id !== postId));
+      setTrashedPosts(prevTrashed => [postToTrash, ...prevTrashed]);
+    }
+  };
+  
+  // ... (以降のコードは変更ありません) ...
   const handleSubmitPost = (postData: any) => {
     const newPost: Post = {
       id: Date.now().toString(),
@@ -67,28 +87,15 @@ const Index = () => {
     });
     setCurrentView('timeline');
   };
-  
-  // ★★★ ここが修正点です ★★★
   const handleRestoreSelected = () => {
-    // 復元する投稿を取得
     const postsToRestore = trashedPosts.filter(p => selectedTrashIds.includes(p.id));
-    
-    // ゴミ箱から復元対象を削除
     setTrashedPosts(prev => prev.filter(p => !selectedTrashIds.includes(p.id)));
-
-    // タイムラインの投稿を更新
     setPosts(prevPosts => {
-      // 現在のタイムラインからサンプル投稿をフィルタリングで除外
       const userPosts = prevPosts.filter(p => !initialPosts.some(ip => ip.id === p.id));
-      // ユーザー自身の投稿リストに、復元した投稿を追加
       return [...postsToRestore, ...userPosts];
     });
-
-    // 選択状態をクリア
     setSelectedTrashIds([]);
   };
-
-  // ... (以降のコードは変更ありません) ...
   const handleToggleTrashSelection = (postId: string) => {
     setSelectedTrashIds(prev =>
       prev.includes(postId)
@@ -113,13 +120,6 @@ const Index = () => {
     setIsTrashOpen(open);
     if (!open) {
       setSelectedTrashIds([]);
-    }
-  };
-  const handleDeletePost = (postId: string) => {
-    const postToTrash = posts.find(p => p.id === postId);
-    if (postToTrash) {
-      setPosts(prevPosts => prevPosts.filter(p => p.id !== postId));
-      setTrashedPosts(prevTrashed => [postToTrash, ...prevTrashed]);
     }
   };
   const handlePostClick = (postId: string) => { setSelectedPostId(postId); setCurrentView('detail'); };
