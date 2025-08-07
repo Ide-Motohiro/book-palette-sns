@@ -26,13 +26,11 @@ const Index = () => {
   const [currentView, setCurrentView] = useState<ViewState>('timeline');
   const [selectedPostId, setSelectedPostId] = useState<string>('');
   
-  // ★★★ ここが修正点です ★★★
   const [posts, setPosts] = useState<Post[]>(() => {
     try {
       const savedPosts = localStorage.getItem('book-palette-posts');
       if (savedPosts) {
         const parsedPosts = JSON.parse(savedPosts);
-        // 保存された投稿が1件以上あれば、それを表示する
         if (Array.isArray(parsedPosts) && parsedPosts.length > 0) {
           return parsedPosts;
         }
@@ -40,7 +38,6 @@ const Index = () => {
     } catch (error) {
       console.error("Failed to load posts from localStorage", error);
     }
-    // localStorageが空、または中身が空の配列だった場合は、初期サンプル投稿を表示する
     return initialPosts;
   });
 
@@ -49,13 +46,49 @@ const Index = () => {
     return savedTrashedPosts ? JSON.parse(savedTrashedPosts) : [];
   });
   
-  // ... (以降のコードは変更ありません) ...
   const [isTrashOpen, setIsTrashOpen] = useState(false);
   const [selectedTrashIds, setSelectedTrashIds] = useState<string[]>([]);
 
   useEffect(() => { localStorage.setItem('book-palette-posts', JSON.stringify(posts)); }, [posts]);
   useEffect(() => { localStorage.setItem('book-palette-trashed-posts', JSON.stringify(trashedPosts)); }, [trashedPosts]);
+  
+  const handleSubmitPost = (postData: any) => {
+    const newPost: Post = {
+      id: Date.now().toString(),
+      bookTitle: postData.bookTitle,
+      author: postData.author,
+      keywords: postData.keywords,
+      color: postData.color,
+      userId: 'currentUser'
+    };
+    setPosts(prevPosts => {
+      const userPosts = prevPosts.filter(p => !initialPosts.some(ip => ip.id === p.id));
+      return [newPost, ...userPosts];
+    });
+    setCurrentView('timeline');
+  };
+  
+  // ★★★ ここが修正点です ★★★
+  const handleRestoreSelected = () => {
+    // 復元する投稿を取得
+    const postsToRestore = trashedPosts.filter(p => selectedTrashIds.includes(p.id));
+    
+    // ゴミ箱から復元対象を削除
+    setTrashedPosts(prev => prev.filter(p => !selectedTrashIds.includes(p.id)));
 
+    // タイムラインの投稿を更新
+    setPosts(prevPosts => {
+      // 現在のタイムラインからサンプル投稿をフィルタリングで除外
+      const userPosts = prevPosts.filter(p => !initialPosts.some(ip => ip.id === p.id));
+      // ユーザー自身の投稿リストに、復元した投稿を追加
+      return [...postsToRestore, ...userPosts];
+    });
+
+    // 選択状態をクリア
+    setSelectedTrashIds([]);
+  };
+
+  // ... (以降のコードは変更ありません) ...
   const handleToggleTrashSelection = (postId: string) => {
     setSelectedTrashIds(prev =>
       prev.includes(postId)
@@ -69,12 +102,6 @@ const Index = () => {
     } else {
       setSelectedTrashIds(trashedPosts.map(p => p.id));
     }
-  };
-  const handleRestoreSelected = () => {
-    const postsToRestore = trashedPosts.filter(p => selectedTrashIds.includes(p.id));
-    setTrashedPosts(prev => prev.filter(p => !selectedTrashIds.includes(p.id)));
-    setPosts(prev => [...postsToRestore, ...prev]);
-    setSelectedTrashIds([]);
   };
   const handlePermanentlyDeleteSelected = () => {
     if (window.confirm(`${selectedTrashIds.length}件の投稿を完全に削除します。この操作は元に戻せません。`)) {
@@ -98,11 +125,6 @@ const Index = () => {
   const handlePostClick = (postId: string) => { setSelectedPostId(postId); setCurrentView('detail'); };
   const handleCreatePost = () => { setCurrentView('create'); };
   const handleBack = () => { setCurrentView('timeline'); };
-  const handleSubmitPost = (postData: any) => {
-    const newPost: Post = { id: Date.now().toString(), ...postData, userId: 'currentUser' };
-    setPosts(prevPosts => [newPost, ...prevPosts]);
-    setCurrentView('timeline');
-  };
 
   if (currentView === 'detail') { return ( <PostDetail postId={selectedPostId} posts={posts} onBack={handleBack} onDelete={handleDeletePost} /> ); }
   if (currentView === 'create') { return ( <CreatePost onBack={handleBack} onSubmit={handleSubmitPost} /> ); }
