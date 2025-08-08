@@ -23,23 +23,15 @@ export const Timeline = ({ posts, onCreatePost, onPostClick, onTrashClick }: Tim
     <div className="min-h-screen bg-user-bg relative">
       {/* Header */}
       <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border">
-        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
+        {/* ★★★ このdivから justify-between とゴミ箱ボタンを削除 ★★★ */}
+        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center">
           
-          {/* ★★★ 変更点: タイトルとアイコンをグループ化 ★★★ */}
           <div className="flex items-center gap-3">
             <img src="/favicon.ico" alt="Book Palette Favicon" className="h-8 w-8" />
             <h1 className="text-2xl font-bold text-foreground">Book Palette</h1>
           </div>
           
-          {/* ゴミ箱ボタン */}
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="ゴミ箱を開く"
-            onClick={onTrashClick}
-          >
-            <Trash2 size={20} />
-          </Button>
+          {/* ヘッダー右端のゴミ箱ボタンはここに無くなりました */}
 
         </div>
       </header>
